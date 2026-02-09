@@ -2089,10 +2089,10 @@ export default function ScheduleApp() {
                       </div>
 
                       {selectedProgram.japanese.classCount > 10 && (
-                        <div style={{ fontSize: 12, opacity: 0.7, marginTop: 8 }}>
-                          ※この画面では最大10クラスまで編集表示しています（11クラス目以降は自動で YY{300 + n} を採用します）
-                        </div>
-                      )}
+  <div style={{ fontSize: 12, opacity: 0.7, marginTop: 8 }}>
+    ※この画面では最大10クラスまで編集表示しています（11クラス目以降は自動で YY300, YY301... を採用します）
+  </div>
+)}
 
                       <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
                         <button
