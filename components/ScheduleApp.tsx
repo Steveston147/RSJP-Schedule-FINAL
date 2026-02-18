@@ -89,7 +89,9 @@ type ScheduleItem = {
   endTime: string; // HH:MM
   category: Category;
   title: string;
+  titleEn?: string;      // ★追加：英語タイトル（任意）
   location: string;
+  locationEn?: string;   // ★追加：英語場所（任意）
   roomNeeded: YesNo;
   studentsCount: number;
   buddyCount: number;
@@ -103,6 +105,7 @@ type ScheduleItem = {
   busDropoff: string;
   arrangementsNeeded: YesNo;
   notes: string;
+  notesEn?: string;      // ★追加：英語備考（任意）
 
   // 日本語講座用（CSVで見分けやすくする）
   classIndex?: number; // 1..classCount
