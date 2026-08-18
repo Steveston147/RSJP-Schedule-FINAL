@@ -1,0 +1,47 @@
+name: Repair ceremony date
+
+on:
+  push:
+    branches:
+      - audit/production-readiness
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: audit/production-readiness
+
+      - name: Repair completion ceremony date
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('components/ScheduleApp.tsx')
+          s = p.read_text(encoding='utf-8')
+          old = '''  items.push({\n    id: uid(),\n    ...makeItemBase(program, firstDay),\n    category: "Ceremony",\n    title: "Completion Ceremony",'''
+          new = '''  items.push({\n    id: uid(),\n    ...makeItemBase(program, program.endDate),\n    category: "Ceremony",\n    title: "Completion Ceremony",'''
+          count = s.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected exactly one ceremony block, found {count}')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+
+      - name: Commit repair if needed
+        shell: bash
+        run: |
+          if git diff --quiet -- components/ScheduleApp.tsx; then
+            echo "No repair needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/ScheduleApp.tsx
+          git commit -m "fix: generate completion ceremony on programme end date"
+          git push origin HEAD:audit/production-readiness
