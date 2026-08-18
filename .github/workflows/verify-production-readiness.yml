@@ -1,0 +1,61 @@
+name: Verify production readiness once
+
+on:
+  push:
+    branches:
+      - audit/production-readiness
+
+permissions:
+  contents: write
+
+jobs:
+  verify-and-record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: audit/production-readiness
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Record successful verification and remove one-time workflow
+        shell: bash
+        run: |
+          mkdir -p docs
+          VERIFIED_SHA="$(git rev-parse HEAD)"
+          VERIFIED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          cat > docs/CI_RESULT.md <<EOF
+          # RSJP Schedule — CI Verification Result
+
+          Result: **PASS**
+
+          - Verified commit: \`${VERIFIED_SHA}\`
+          - Verified at (UTC): \`${VERIFIED_AT}\`
+          - Node.js: 20
+          - Install: \`npm ci\`
+          - Lint: \`npm run lint\`
+          - Production build: \`npm run build\`
+
+          This record was written only after all commands above completed successfully in GitHub Actions.
+          EOF
+          git rm .github/workflows/verify-production-readiness.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/CI_RESULT.md
+          git commit -m "ci: record successful production readiness verification"
+          git push origin HEAD:audit/production-readiness
