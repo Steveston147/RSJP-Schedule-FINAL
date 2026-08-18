@@ -2,12 +2,12 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Schedule",
-  description: "Schedule app"
+  title: "RSJP Schedule",
+  description: "RSJP and custom programme schedule planning tool",
 };
 
 export default function RootLayout({
-  children
+  children,
 }: {
   children: React.ReactNode;
 }) {
