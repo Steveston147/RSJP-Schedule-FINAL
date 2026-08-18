@@ -1,0 +1,77 @@
+name: Diagnose security upgrade once
+
+on:
+  push:
+    branches:
+      - audit/production-readiness
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: audit/production-readiness
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Run upgrade diagnostics
+        shell: bash
+        run: |
+          set +e
+          mkdir -p docs
+          : > /tmp/diag.log
+
+          echo '## Upgrade dependencies' >> /tmp/diag.log
+          npm install --save-exact next@15.5.21 react@19.1.9 react-dom@19.1.9 >> /tmp/diag.log 2>&1
+          UPGRADE_APP=$?
+          echo "exit=${UPGRADE_APP}" >> /tmp/diag.log
+
+          echo '## Upgrade dev dependencies' >> /tmp/diag.log
+          npm install --save-dev --save-exact eslint-config-next@15.5.21 @types/react@19 @types/react-dom@19 >> /tmp/diag.log 2>&1
+          UPGRADE_DEV=$?
+          echo "exit=${UPGRADE_DEV}" >> /tmp/diag.log
+
+          echo '## Clean install' >> /tmp/diag.log
+          npm ci >> /tmp/diag.log 2>&1
+          CLEAN=$?
+          echo "exit=${CLEAN}" >> /tmp/diag.log
+
+          echo '## Lint' >> /tmp/diag.log
+          npm run lint >> /tmp/diag.log 2>&1
+          LINT=$?
+          echo "exit=${LINT}" >> /tmp/diag.log
+
+          echo '## Build' >> /tmp/diag.log
+          npm run build >> /tmp/diag.log 2>&1
+          BUILD=$?
+          echo "exit=${BUILD}" >> /tmp/diag.log
+
+          {
+            echo '# RSJP Schedule — Security Upgrade Diagnostic'
+            echo
+            echo "- app upgrade exit: ${UPGRADE_APP}"
+            echo "- dev upgrade exit: ${UPGRADE_DEV}"
+            echo "- npm ci exit: ${CLEAN}"
+            echo "- lint exit: ${LINT}"
+            echo "- build exit: ${BUILD}"
+            echo
+            echo '```text'
+            tail -n 180 /tmp/diag.log
+            echo '```'
+          } > docs/SECURITY_DIAGNOSTIC.md
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json docs/SECURITY_DIAGNOSTIC.md
+          git commit -m "ci: record security upgrade diagnostic"
+          git push origin HEAD:audit/production-readiness
