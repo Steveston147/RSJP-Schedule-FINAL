@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# RSJP Schedule
 
-## Getting Started
+RSJP Schedule is a browser-based operational tool for preparing RSJP and custom short-term programme schedules.
 
-First, run the development server:
+It supports programme setup, Japanese-class schedule generation, date-specific overrides, manual event management, calendar preview, and JSON / CSV / ICS / HTML export.
+
+## Status
+
+Production-readiness documentation was refreshed on 2026-08-18. The application should be treated as **controlled operational use** until the UAT checklist in `docs/UAT.md` has been completed against the deployed production revision.
+
+## What this application is for
+
+RSJP Schedule helps staff:
+
+- create RSJP or custom programme schedules;
+- define programme dates and participant counts;
+- generate recurring Japanese-class schedule entries;
+- apply day-specific Japanese-class overrides;
+- add cultural activities, company visits, buddy events, transport details, rooms, and other operational events;
+- review a calendar-style preview;
+- export Japanese or English schedule files;
+- move or restore working data with JSON backup files.
+
+## Important data-storage rule
+
+The working dataset is stored in the browser's `localStorage`.
+
+This means:
+
+- there is no central shared database;
+- another computer or browser does not automatically have the same data;
+- clearing browser/site data can remove the working dataset;
+- Vercel deployment history is not a schedule-data backup.
+
+**Export JSON after material changes and before destructive operations or device/browser changes.**
+
+## Human-control rule
+
+Automatically generated schedule entries are templates. The application does not confirm room bookings, transport reservations, staffing, attendance, contracts, or other institutional transactions. Staff must check the schedule against the authoritative source for each operational arrangement before circulation.
+
+## Information-security rule
+
+Do not enter unnecessary personal or sensitive student information. This tool is intended for programme-level scheduling information, not passports, visa documents, health information, payment data, personal addresses, or credentials.
+
+## Documentation
+
+- [`docs/SPECIFICATION.md`](docs/SPECIFICATION.md) — functional scope, behaviour, data model, limitations
+- [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — operating rules, backup/restore, export, incident handling
+- [`docs/UAT.md`](docs/UAT.md) — production-readiness and browser UAT checklist
+
+## Local development
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Before merging a production change:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+## Technology
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- browser localStorage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Current architectural limitations
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The current release has no built-in authentication, central database, real-time multi-user collaboration, server-side audit log, or institutional backup service. These are deliberate boundaries that must be understood when deciding where and how to deploy the application.

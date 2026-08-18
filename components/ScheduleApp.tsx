@@ -347,7 +347,7 @@ function buildAutoItems(program: Program): ScheduleItem[] {
 
   items.push({
     id: uid(),
-    ...makeItemBase(program, firstDay),
+    ...makeItemBase(program, program.endDate),
     category: "Ceremony",
     title: "Completion Ceremony",
     startTime: "13:10",
