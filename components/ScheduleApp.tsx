@@ -101,6 +101,26 @@ type AppState = {
 
 const STORAGE_KEY = "rsjp_schedule_mvp_state_v2";
 
+function isValidImportedState(value: unknown): value is AppState {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<AppState>;
+  if (!Array.isArray(candidate.programs) || !Array.isArray(candidate.items)) return false;
+
+  const programIds = new Set<string>();
+  for (const program of candidate.programs) {
+    if (!program || typeof program.id !== "string" || !program.id.trim() || typeof program.name !== "string") return false;
+    if (programIds.has(program.id)) return false;
+    programIds.add(program.id);
+  }
+
+  for (const item of candidate.items) {
+    if (!item || typeof item.id !== "string" || !item.id.trim() || typeof item.programId !== "string" || !programIds.has(item.programId)) return false;
+    if (typeof item.date !== "string" || typeof item.startTime !== "string" || typeof item.endTime !== "string") return false;
+  }
+
+  return true;
+}
+
 function uid() {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 }
@@ -1162,9 +1182,9 @@ export default function ScheduleApp() {
     reader.onload = () => {
       try {
         const txt = String(reader.result ?? "");
-        const parsed = JSON.parse(txt) as AppState;
-        if (!parsed || !Array.isArray(parsed.programs) || !Array.isArray(parsed.items)) {
-          alert("JSONの形式が正しくありません。");
+        const parsed = JSON.parse(txt) as unknown;
+        if (!isValidImportedState(parsed)) {
+          alert("JSONの形式または参照関係が正しくありません。Program IDの重複や孤立した予定がないか確認してください。");
           return;
         }
 
