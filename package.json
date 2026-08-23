@@ -6,7 +6,10 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "validate:security": "node scripts/validate-security-boundary.mjs",
+    "auth:hash": "node scripts/hash-password.mjs"
   },
   "dependencies": {
     "next": "15.5.21",

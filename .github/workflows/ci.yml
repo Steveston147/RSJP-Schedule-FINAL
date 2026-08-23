@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - main
-      - audit/production-readiness
+      - hardening/rsjp-schedule-auth-security-20260823
 
 permissions:
   contents: read
@@ -17,8 +17,9 @@ concurrency:
 
 jobs:
   verify:
+    name: Quality Gate
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,11 +30,20 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
+      - name: Install deterministic dependencies
         run: npm ci
+
+      - name: Reject high-severity dependency vulnerabilities
+        run: npm audit --audit-level=high
+
+      - name: Validate security boundary
+        run: npm run validate:security
 
       - name: Lint
         run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
 
       - name: Build
         run: npm run build
