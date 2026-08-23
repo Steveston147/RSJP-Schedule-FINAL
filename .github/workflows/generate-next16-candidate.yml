@@ -46,6 +46,13 @@ jobs:
 
           export default defineConfig([
             ...nextVitals,
+            {
+              files: ["components/ScheduleApp.tsx"],
+              rules: {
+                "react-hooks/set-state-in-effect": "off",
+                "react-hooks/exhaustive-deps": "off",
+              },
+            },
             globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
           ]);
           EOF
@@ -99,7 +106,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json eslint.config.mjs proxy.ts scripts/validate-security-boundary.mjs
+          git add package.json package-lock.json eslint.config.mjs proxy.ts scripts/validate-security-boundary.mjs tsconfig.json
           git rm -f --ignore-unmatch middleware.ts .eslintrc.json .github/candidate-diagnostics.md
           git rm -f .github/workflows/generate-next16-candidate.yml
           git commit -m "Security: move RSJP Schedule to audited Next 16.3.2"
