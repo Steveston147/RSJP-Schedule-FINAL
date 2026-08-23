@@ -1,0 +1,52 @@
+name: Final UAT label fix
+
+on:
+  push:
+    branches:
+      - hardening/rsjp-schedule-auth-security-20260823
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: hardening/rsjp-schedule-auth-security-20260823
+      - name: Apply verified label-only UI change
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('components/ScheduleApp.tsx')
+          s = p.read_text(encoding='utf-8')
+          old = '''                    <input
+                      type="number"
+                      value={selectedProgram.studentsCount}
+                      onChange={(e) => updateProgram({ studentsCount: clamp(Number(e.target.value), 1, 999) })}
+                      placeholder="留学生数"
+                    />'''
+          new = '''                    <label style={{ display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" }}>
+                      <span style={{ fontSize: 12, opacity: 0.75 }}>留学生数</span>
+                      <input
+                        type="number"
+                        value={selectedProgram.studentsCount}
+                        onChange={(e) => updateProgram({ studentsCount: clamp(Number(e.target.value), 1, 999) })}
+                        aria-label="留学生数"
+                        style={{ width: "100%", minWidth: 0 }}
+                      />
+                      <span style={{ fontSize: 12, opacity: 0.75 }}>人</span>
+                    </label>'''
+          if s.count(old) != 1:
+              raise SystemExit(f'Expected exactly one studentsCount input block, found {s.count(old)}')
+          p.write_text(s.replace(old, new), encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/ScheduleApp.tsx
+          git rm .github/workflows/final-ui-label.yml
+          git commit -m "UI: label RSJP Schedule student count field"
+          git push origin HEAD:hardening/rsjp-schedule-auth-security-20260823
