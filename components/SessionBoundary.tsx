@@ -59,7 +59,7 @@ export default function SessionBoundary({ children }: { children: ReactNode }) {
   }, [clearExpiryTimer, redirectToLogin]);
 
   useEffect(() => {
-    void verifySession();
+    const initialCheck = window.setTimeout(() => void verifySession(), 0);
     const interval = window.setInterval(() => void verifySession(), REVALIDATE_INTERVAL_MS);
     const onFocus = () => void verifySession();
     const onVisibility = () => {
@@ -69,6 +69,7 @@ export default function SessionBoundary({ children }: { children: ReactNode }) {
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
+      window.clearTimeout(initialCheck);
       window.clearInterval(interval);
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisibility);
