@@ -22,44 +22,12 @@ Security boundary validation passed.
 
 
 /home/runner/work/RSJP-Schedule-FINAL/RSJP-Schedule-FINAL/components/ScheduleApp.tsx
-   998:6  warning  React Hook useMemo has a missing dependency: 'selectedProgram'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
-  1003:5  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+  1012:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
 
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+✖ 1 problem (0 errors, 1 warning)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
 
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-/home/runner/work/RSJP-Schedule-FINAL/RSJP-Schedule-FINAL/components/ScheduleApp.tsx:1003:5
-  1001 |   useEffect(() => {
-  1002 |     if (!selectedProgram) return;
-> 1003 |     setStudentsCount(selectedProgram.studentsCount);
-       |     ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  1004 |     setNewDate(selectedProgram.startDate);
-  1005 |   }, [selectedProgram?.id]);
-  1006 |                                                                     react-hooks/set-state-in-effect
-  1005:6  warning  React Hook useEffect has a missing dependency: 'selectedProgram'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
-  1010:5  error    Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-/home/runner/work/RSJP-Schedule-FINAL/RSJP-Schedule-FINAL/components/ScheduleApp.tsx:1010:5
-  1008 |   useEffect(() => {
-  1009 |     if (!selectedProgram) return;
-> 1010 |     setOverrideDate(selectedProgram.startDate);
-       |     ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  1011 |     loadOverrideFromProgram(selectedProgram.startDate);
-  1012 |     // eslint-disable-next-line react-hooks/exhaustive-deps
-  1013 |   }, [selectedProgram?.id]);  react-hooks/set-state-in-effect
-  1349:6  warning  React Hook useMemo has a missing dependency: 'selectedProgram'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
-
-✖ 5 problems (2 errors, 3 warnings)
-
+ESLint found too many warnings (maximum: 0).
 ```
 
 ## typecheck
@@ -77,7 +45,7 @@ Calling setState synchronously within an effect body causes cascading renders th
 > next build
 
 ▲ Next.js 16.3.2 (Turbopack)
-✓ Running next.config.js took 18ms
+✓ Running next.config.js took 19ms
 ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
 This information is used to shape Next.js' roadmap and prioritize features.
@@ -89,7 +57,7 @@ https://nextjs.org/telemetry
 Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
   npx update-browserslist-db@latest
   Why you should do it regularly: https://github.com/browserslist/update-db#readme
-✓ Compiled successfully in 5.1s
+✓ Compiled successfully in 5.3s
   Running TypeScript ...
 
   We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
@@ -101,13 +69,13 @@ Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
 
   	- jsx was set to react-jsx (next.js uses the React automatic runtime)
 
-  Finished TypeScript in 2.9s ...
+  Finished TypeScript in 3.0s ...
   Collecting page data using 3 workers ...
   Generating static pages using 3 workers (0/9) ...
   Generating static pages using 3 workers (2/9) 
   Generating static pages using 3 workers (4/9) 
   Generating static pages using 3 workers (6/9) 
-✓ Generating static pages using 3 workers (9/9) in 280ms
+✓ Generating static pages using 3 workers (9/9) in 257ms
   Finalizing page optimization ...
 
 Route (app)
