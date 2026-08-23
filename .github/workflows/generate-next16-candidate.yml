@@ -62,10 +62,18 @@ jobs:
           p = Path('proxy.ts')
           s = p.read_text(encoding='utf-8').replace('export async function middleware(', 'export async function proxy(')
           p.write_text(s, encoding='utf-8')
+
           p = Path('scripts/validate-security-boundary.mjs')
           s = p.read_text(encoding='utf-8').replace('readFileSync("middleware.ts", "utf8")', 'readFileSync("proxy.ts", "utf8")')
           s = s.replace('Middleware must protect application routes', 'Proxy must protect application routes')
           p.write_text(s, encoding='utf-8')
+
+          p = Path('components/ScheduleApp.tsx')
+          s = p.read_text(encoding='utf-8')
+          marker = '    // eslint-disable-next-line react-hooks/exhaustive-deps\n'
+          if s.count(marker) != 1:
+              raise SystemExit(f'Expected exactly one stale exhaustive-deps suppression, found {s.count(marker)}')
+          p.write_text(s.replace(marker, ''), encoding='utf-8')
           PY
 
       - name: Verify full candidate before publishing
@@ -106,7 +114,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json eslint.config.mjs proxy.ts scripts/validate-security-boundary.mjs tsconfig.json
+          git add package.json package-lock.json eslint.config.mjs proxy.ts scripts/validate-security-boundary.mjs tsconfig.json components/ScheduleApp.tsx
           git rm -f --ignore-unmatch middleware.ts .eslintrc.json .github/candidate-diagnostics.md
           git rm -f .github/workflows/generate-next16-candidate.yml
           git commit -m "Security: move RSJP Schedule to audited Next 16.3.2"
