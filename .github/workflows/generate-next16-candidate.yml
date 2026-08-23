@@ -6,15 +6,22 @@ on:
       - hardening/rsjp-schedule-auth-security-20260823
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: rsjp-next16-candidate
+  cancel-in-progress: true
 
 jobs:
   candidate:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: hardening/rsjp-schedule-auth-security-20260823
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -54,29 +61,46 @@ jobs:
           p.write_text(s, encoding='utf-8')
           PY
 
-      - name: Audit high severity
-        run: npm audit --audit-level=high
+      - name: Verify full candidate before publishing
+        shell: bash
+        run: |
+          set +e
+          status=0
+          mkdir -p /tmp/rsjp-candidate
 
-      - name: Validate security boundary
-        run: npm run validate:security
+          npm audit --audit-level=high > /tmp/rsjp-candidate/audit.log 2>&1 || status=1
+          npm run validate:security > /tmp/rsjp-candidate/security.log 2>&1 || status=1
+          npm run lint > /tmp/rsjp-candidate/lint.log 2>&1 || status=1
+          npm run typecheck > /tmp/rsjp-candidate/typecheck.log 2>&1 || status=1
+          npm run build > /tmp/rsjp-candidate/build.log 2>&1 || status=1
 
-      - name: Lint
-        run: npm run lint
+          if [ "$status" -ne 0 ]; then
+            {
+              echo '# Next 16 candidate diagnostics'
+              echo
+              for f in audit security lint typecheck build; do
+                echo "## $f"
+                echo '```text'
+                cat "/tmp/rsjp-candidate/$f.log"
+                echo '```'
+                echo
+              done
+            } > .github/candidate-diagnostics.md
 
-      - name: Typecheck
-        run: npm run typecheck
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .github/candidate-diagnostics.md
+            git commit -m "chore: capture Next 16 candidate diagnostics" || true
+            git push origin HEAD:hardening/rsjp-schedule-auth-security-20260823
+            exit 1
+          fi
 
-      - name: Build
-        run: npm run build
-
-      - name: Upload candidate files
-        uses: actions/upload-artifact@v4
-        with:
-          name: next16-candidate
-          path: |
-            package.json
-            package-lock.json
-            eslint.config.mjs
-            proxy.ts
-            scripts/validate-security-boundary.mjs
-          if-no-files-found: error
+      - name: Publish verified candidate and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json eslint.config.mjs proxy.ts scripts/validate-security-boundary.mjs
+          git rm -f --ignore-unmatch middleware.ts .eslintrc.json .github/candidate-diagnostics.md
+          git rm -f .github/workflows/generate-next16-candidate.yml
+          git commit -m "Security: move RSJP Schedule to audited Next 16.3.2"
+          git push origin HEAD:hardening/rsjp-schedule-auth-security-20260823
