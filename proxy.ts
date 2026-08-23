@@ -72,7 +72,7 @@ async function verifySessionToken(token: string) {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const token = request.cookies.get(COOKIE_NAME)?.value ?? "";
   const valid = token ? await verifySessionToken(token) : false;

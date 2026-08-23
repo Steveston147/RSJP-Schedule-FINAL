@@ -1009,7 +1009,6 @@ export default function ScheduleApp() {
     if (!selectedProgram) return;
     setOverrideDate(selectedProgram.startDate);
     loadOverrideFromProgram(selectedProgram.startDate);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProgram?.id]);
 
   function updateProgram(partial: Partial<Program>) {

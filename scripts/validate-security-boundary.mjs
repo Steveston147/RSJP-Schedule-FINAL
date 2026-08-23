@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 
 const auth = readFileSync("lib/auth.ts", "utf8");
-const middleware = readFileSync("middleware.ts", "utf8");
+const middleware = readFileSync("proxy.ts", "utf8");
 const scheduleApp = readFileSync("components/ScheduleApp.tsx", "utf8");
 const nextConfig = readFileSync("next.config.js", "utf8");
 const loginRoute = readFileSync("app/api/auth/login/route.ts", "utf8");
@@ -12,7 +12,7 @@ const checks = [
   [auth.includes("SCHEDULE_AUTH_SESSION_SECRET"), "Session secret must come from server environment"],
   [auth.includes("SCHEDULE_AUTH_ALLOWED_EMAILS"), "Restricted email allowlist must be server-side"],
   [auth.includes("SCHEDULE_AUTH_SHARED_PASSWORD_HASH"), "Production password must be stored as a hash"],
-  [middleware.includes('pathname === "/login"'), "Middleware must protect application routes"],
+  [middleware.includes('pathname === "/login"'), "Proxy must protect application routes"],
   [middleware.includes("api/auth"), "Auth API routes must remain reachable before login"],
   [loginRoute.includes("checkScheduleLoginRateLimit"), "Login must apply rate limiting before credential verification"],
   [scheduleApp.includes('const STORAGE_KEY = "rsjp_schedule_mvp_state_v2";'), "Known localStorage boundary must remain explicit"],
