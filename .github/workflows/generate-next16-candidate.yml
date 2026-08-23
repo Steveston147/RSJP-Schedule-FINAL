@@ -1,0 +1,82 @@
+name: Generate Next 16 candidate
+
+on:
+  push:
+    branches:
+      - hardening/rsjp-schedule-auth-security-20260823
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install audited Next 16 candidate
+        run: |
+          npm install --save-exact next@16.3.2 react@19.2.7 react-dom@19.2.7
+          npm install --save-dev --save-exact eslint@9.39.1 eslint-config-next@16.3.2
+          npm audit fix
+
+      - name: Migrate lint and Proxy conventions
+        shell: bash
+        run: |
+          npm pkg set 'scripts.lint=eslint . --max-warnings=0'
+          rm -f .eslintrc.json
+          cat > eslint.config.mjs <<'EOF'
+          import { defineConfig, globalIgnores } from "eslint/config";
+          import nextVitals from "eslint-config-next/core-web-vitals";
+
+          export default defineConfig([
+            ...nextVitals,
+            globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+          ]);
+          EOF
+          mv middleware.ts proxy.ts
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('proxy.ts')
+          s = p.read_text(encoding='utf-8').replace('export async function middleware(', 'export async function proxy(')
+          p.write_text(s, encoding='utf-8')
+          p = Path('scripts/validate-security-boundary.mjs')
+          s = p.read_text(encoding='utf-8').replace('readFileSync("middleware.ts", "utf8")', 'readFileSync("proxy.ts", "utf8")')
+          s = s.replace('Middleware must protect application routes', 'Proxy must protect application routes')
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Audit high severity
+        run: npm audit --audit-level=high
+
+      - name: Validate security boundary
+        run: npm run validate:security
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload candidate files
+        uses: actions/upload-artifact@v4
+        with:
+          name: next16-candidate
+          path: |
+            package.json
+            package-lock.json
+            eslint.config.mjs
+            proxy.ts
+            scripts/validate-security-boundary.mjs
+          if-no-files-found: error
