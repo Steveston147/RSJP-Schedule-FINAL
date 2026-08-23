@@ -73,7 +73,9 @@ Before browser Preview/UAT, GitHub CI must pass:
 5. `npm run typecheck`;
 6. `npm run build`.
 
-Dependency versions are not upgraded merely for uniformity with other applications. Upgrades should be driven by a concrete audit/build finding and then revalidated.
+Dependency versions are not upgraded merely for uniformity with other applications. Upgrades must be driven by a concrete audit/build finding and then revalidated.
+
+On 2026-08-23 the existing Next.js 15.5.21 lockfile produced 13 high-severity and 2 moderate audit findings. The audit output identified Next.js transitive PostCSS/sharp findings that required the Next.js 16.3.2 path. A GitHub-runner candidate using Next.js 16.3.2, React 19.2.7, React DOM 19.2.7, ESLint 9.39.1, and eslint-config-next 16.3.2 then completed with `npm audit` reporting 0 vulnerabilities and passed the security validator, typecheck, and production build. The final candidate also passed lint after limiting two legacy Hook compatibility exceptions to `components/ScheduleApp.tsx` and removing one stale lint-suppression comment.
 
 ## Future target
 
