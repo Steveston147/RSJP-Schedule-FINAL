@@ -16,7 +16,12 @@ function normalize(email: string) {
 }
 
 function effectiveMode(): Mode {
-  if (env("VERCEL_ENV").toLowerCase() === "production") return "restricted";
+  const vercelEnv = env("VERCEL_ENV").toLowerCase();
+  if (vercelEnv === "production") return "restricted";
+  if (vercelEnv === "preview" || vercelEnv === "development") {
+    return env("SCHEDULE_AUTH_MODE").toLowerCase() === "restricted" ? "restricted" : "demo";
+  }
+  if (env("NODE_ENV").toLowerCase() === "production") return "restricted";
   return env("SCHEDULE_AUTH_MODE").toLowerCase() === "restricted" ? "restricted" : "demo";
 }
 

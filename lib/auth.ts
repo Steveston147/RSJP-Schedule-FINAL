@@ -29,19 +29,26 @@ export function isValidScheduleEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeScheduleEmail(email));
 }
 
-function isVercelProduction(): boolean {
-  return env("VERCEL_ENV").toLowerCase() === "production";
+function vercelEnvironment(): string {
+  return env("VERCEL_ENV").toLowerCase();
+}
+
+function isProductionRuntime(): boolean {
+  const vercelEnv = vercelEnvironment();
+  if (vercelEnv === "production") return true;
+  if (vercelEnv === "preview" || vercelEnv === "development") return false;
+  return env("NODE_ENV").toLowerCase() === "production";
 }
 
 export function getEffectiveScheduleAuthMode(): ScheduleAuthMode {
-  if (isVercelProduction()) return "restricted";
+  if (isProductionRuntime()) return "restricted";
   return env("SCHEDULE_AUTH_MODE").toLowerCase() === "restricted" ? "restricted" : "demo";
 }
 
 function getSessionSecret(): string {
   const configured = env("SCHEDULE_AUTH_SESSION_SECRET");
   if (configured.length >= 32) return configured;
-  if (getEffectiveScheduleAuthMode() === "demo" && !isVercelProduction()) return DEMO_SESSION_SECRET;
+  if (getEffectiveScheduleAuthMode() === "demo" && !isProductionRuntime()) return DEMO_SESSION_SECRET;
   return "";
 }
 
